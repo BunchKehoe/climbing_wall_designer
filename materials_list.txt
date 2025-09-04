@@ -1,0 +1,59 @@
+=== DIY Climbing Wall Materials List ===
+
+WALL SPECIFICATIONS
+------------------
+Overall Height: 2.40 m
+Overall Width: 2.40 m
+Depth from Wall: 3.00 m
+Wall Angle: 25°
+Actual Panel Length: 2.65 m
+Total Panel Area: 6.36 m²
+
+PLYWOOD PANELS
+-------------
+Type: Structural Plywood (minimum 18mm thick)
+Full Sheets Required: 4
+Sheet Size: 2500mm x 1250mm
+Coverage Area Required: 6.36 m²
+
+TIMBER FRAME
+-----------
+Base beam: 2.40 m
+Uprights (x2): 5.30 m
+Cross braces (x2): 2.40 m
+Kicker/struts: 1.12 m
+
+CLIMBING HOLDS & HARDWARE
+-----------------------
+T-nuts Required: 144 (20mm countersunk)
+Recommended Holds: 72
+Mounting Bolts: 72 (M10 Allen head)
+T-nut Spacing: 20.0 cm
+
+CRITICAL ANGLES
+--------------
+Upright to base: 25.0°
+Top plate join: 65.0°
+
+SAFETY INFORMATION
+-----------------
+Maximum Safe Climber Weight: 153.6 kg
+Safety Factor: 2.5
+Recommended Anchor Points: 4 minimum
+
+ADDITIONAL MATERIALS
+-------------------
+- Weather sealant for plywood
+- Construction screws (minimum 4 per joint)
+- Washers for all bolts
+- Anti-slip matting for ground protection
+
+INSTALLATION NOTES
+-----------------
+1. All timber should be structural grade
+2. Use galvanized/weather-resistant hardware if outdoor installation
+3. Pre-drill all screw holes to prevent splitting
+4. Check all angles before final assembly
+5. Ensure proper anchoring to ground/wall
+6. Apply sealant before installing holds
+7. Double-check all bolt tightness before use

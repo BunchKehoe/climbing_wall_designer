@@ -190,12 +190,90 @@ def draw_wall(spec: WallSpec, materials: MaterialList):
     
     # Save the figure
 
-    save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "wall_design.png")
+    save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "designs/wall_design.png")
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     print(f"\nWall design saved to: {save_path}")
     
     # Uncomment to show interactive plot instead of saving
     # plt.show()
+
+def create_materials_list(spec: WallSpec, materials: MaterialList):
+    """Create a detailed materials list file with dimensions and quantities"""
+    
+    # Calculate additional measurements
+    angle = math.radians(spec.angle_deg)
+    panel_height = spec.height / math.cos(angle)
+    panel_area = spec.width * panel_height
+    
+    content = f"""=== DIY Climbing Wall Materials List ===
+
+WALL SPECIFICATIONS
+------------------
+Overall Height: {spec.height:.2f} m
+Overall Width: {spec.width:.2f} m
+Depth from Wall: {spec.depth:.2f} m
+Wall Angle: {spec.angle_deg}°
+Actual Panel Length: {panel_height:.2f} m
+Total Panel Area: {panel_area:.2f} m²
+
+PLYWOOD PANELS
+-------------
+Type: Structural Plywood (minimum 18mm thick)
+Full Sheets Required: {materials.plywood_sheets}
+Sheet Size: 2500mm x 1250mm
+Coverage Area Required: {panel_area:.2f} m²
+
+TIMBER FRAME
+-----------"""
+
+    for name, length in materials.timber_lengths:
+        content += f"\n{name}: {length:.2f} m"
+    
+    content += f"""
+
+CLIMBING HOLDS & HARDWARE
+-----------------------
+T-nuts Required: {materials.tnuts} (20mm countersunk)
+Recommended Holds: {materials.holds}
+Mounting Bolts: {materials.bolts} (M10 Allen head)
+T-nut Spacing: {spec.tnut_spacing * 100:.1f} cm
+
+CRITICAL ANGLES
+--------------"""
+    
+    for joint, angle in materials.cut_angles.items():
+        content += f"\n{joint}: {angle:.1f}°"
+
+    content += f"""
+
+SAFETY INFORMATION
+-----------------
+Maximum Safe Climber Weight: {materials.safe_climber_weight:.1f} kg
+Safety Factor: 2.5
+Recommended Anchor Points: 4 minimum
+
+ADDITIONAL MATERIALS
+-------------------
+- Weather sealant for plywood
+- Construction screws (minimum 4 per joint)
+- Washers for all bolts
+- Anti-slip matting for ground protection
+
+INSTALLATION NOTES
+-----------------
+1. All timber should be structural grade
+2. Use galvanized/weather-resistant hardware if outdoor installation
+3. Pre-drill all screw holes to prevent splitting
+4. Check all angles before final assembly
+5. Ensure proper anchoring to ground/wall
+6. Apply sealant before installing holds
+7. Double-check all bolt tightness before use"""
+
+    # Create materials list file
+    materials_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "materials_lists/materials_list.txt")
+    with open(materials_path, 'w') as f:
+        f.write(content)
+    print(f"\nMaterials list saved to: {materials_path}")
 
 def frange(start, stop, step):
     while start < stop:
@@ -220,5 +298,6 @@ if __name__ == "__main__":
     print("\n=== Safety Check ===")
     print(f"Safe maximum climber weight: {materials.safe_climber_weight:.1f} kg")
 
-    # Draw the wall
+    # Generate the design and materials list
     draw_wall(wall, materials)
+    create_materials_list(wall, materials)
