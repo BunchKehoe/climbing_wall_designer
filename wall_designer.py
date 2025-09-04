@@ -6,9 +6,9 @@ import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import os
 
-HEIGHT = 1.77  # meters
-WIDTH = 1.2   # meters
-DEPTH = 1.94   # meters
+HEIGHT = 2  # meters
+WIDTH = 3   # meters
+DEPTH = 3   # meters
 
 @dataclass
 class WallSpec:
@@ -351,7 +351,7 @@ def frange(start, stop, step):
         start += step
 
 if __name__ == "__main__":
-    wall = WallSpec(height=2.4, width=2.4, depth=2.0)  # depth adjusted to accommodate calculated angle
+    wall = WallSpec(height=HEIGHT, width=WIDTH, depth=DEPTH)  # depth adjusted to accommodate calculated angle
     materials = calculate_wall(wall)
 
     print("=== DIY Climbing Wall Plan ===")
