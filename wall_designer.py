@@ -1,6 +1,10 @@
 import math
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 from dataclasses import dataclass
+import numpy as np
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+import os
 
 @dataclass
 class WallSpec:
@@ -79,42 +83,119 @@ def calculate_wall(spec: WallSpec) -> MaterialList:
         safe_climber_weight=safe_climber_weight
     )
 
-def draw_wall(spec: WallSpec, materials: MaterialList):
+def create_3d_wall(spec: WallSpec):
+    """Generate 3D coordinates for the wall structure"""
     angle = math.radians(spec.angle_deg)
-    panel_height = spec.height / math.cos(angle)
-    panel_depth = spec.height * math.tan(angle)
+    h, w = spec.height, spec.width
+    d = h * math.tan(angle)
 
-    fig, ax = plt.subplots(figsize=(8,6))
+    # Main wall panel vertices
+    panel = np.array([
+        [0, 0, 0],           # bottom left
+        [w, 0, 0],           # bottom right
+        [w, h*math.cos(angle), h*math.sin(angle)],  # top right
+        [0, h*math.cos(angle), h*math.sin(angle)]   # top left
+    ])
 
-    # Draw wall panel
-    ax.plot([0, spec.width], [0, spec.height], color="blue", linewidth=2)
-    ax.plot([0, spec.width], [0, spec.height], color="blue")
-    ax.add_patch(plt.Polygon(
-        [[0,0], [spec.width,0], 
-         [spec.width - panel_depth, spec.height], 
-         [-panel_depth, spec.height]], 
-        closed=True, fill=False, edgecolor="blue", linewidth=2, label="Climbing Wall"
-    ))
+    # Support structure vertices
+    left_support = np.array([
+        [0, 0, 0],           # bottom front
+        [0, 0, d],           # bottom back
+        [0, h*math.cos(angle), h*math.sin(angle)],  # top front
+    ])
 
-    # T-nut grid
+    right_support = np.array([
+        [w, 0, 0],           # bottom front
+        [w, 0, d],           # bottom back
+        [w, h*math.cos(angle), h*math.sin(angle)]   # top front
+    ])
+
+    # Base frame vertices
+    base = np.array([
+        [0, 0, 0],           # front left
+        [w, 0, 0],           # front right
+        [w, 0, d],           # back right
+        [0, 0, d]            # back left
+    ])
+
+    return panel, left_support, right_support, base
+
+def draw_wall(spec: WallSpec, materials: MaterialList):
+    fig = plt.figure(figsize=(15, 10))
+    
+    # Main 3D view (top left)
+    ax1 = fig.add_subplot(121, projection='3d')
+    panel, left_support, right_support, base = create_3d_wall(spec)
+    
+    # Plot main climbing surface
+    ax1.add_collection3d(Poly3DCollection([panel], facecolors='lightgray', alpha=0.3, edgecolors='black'))
+    
+    # Plot support structures
+    ax1.add_collection3d(Poly3DCollection([left_support], facecolors='green', alpha=0.3))
+    ax1.add_collection3d(Poly3DCollection([right_support], facecolors='green', alpha=0.3))
+    ax1.add_collection3d(Poly3DCollection([base], facecolors='brown', alpha=0.3))
+
+    # Set axis limits and labels
+    max_dim = max(spec.width, spec.height, spec.depth)
+    ax1.set_box_aspect([spec.width, spec.height, spec.depth])
+    ax1.set_xlabel('Width (m)')
+    ax1.set_ylabel('Depth (m)')
+    ax1.set_zlabel('Height (m)')
+    
+    # Add dimensions
+    ax1.text(spec.width/2, -0.2, 0, f'{spec.width:.2f}m', ha='center')
+    ax1.text(-0.2, spec.height/2, 0, f'{spec.height:.2f}m', ha='right')
+    ax1.text(spec.width+0.2, 0, spec.depth/2, f'{spec.depth:.2f}m', ha='left')
+    
+    # Top view with T-nut grid (top right)
+    ax2 = fig.add_subplot(222)
     spacing = spec.tnut_spacing
-    for x in frange(spacing, spec.width-spacing, spacing):
-        for y in frange(spacing, spec.height-spacing, spacing):
-            ax.plot(x, y, "ro", markersize=2)
+    angle = math.radians(spec.angle_deg)
+    panel_width = spec.width
+    panel_height = spec.height / math.cos(angle)
+    
+    # Draw panel outline
+    ax2.add_patch(plt.Rectangle((0, 0), panel_width, panel_height, fill=False))
+    
+    # Draw T-nut grid
+    for x in np.arange(spacing, panel_width-spacing/2, spacing):
+        for y in np.arange(spacing, panel_height-spacing/2, spacing):
+            ax2.plot(x, y, 'ko', markersize=3)
+    
+    ax2.set_title('T-nut Grid Layout (Top View)')
+    ax2.set_aspect('equal')
+    ax2.set_xlabel('Width (m)')
+    ax2.set_ylabel('Length (m)')
+    
+    # Side view (bottom right)
+    ax3 = fig.add_subplot(224)
+    h = spec.height
+    d = h * math.tan(angle)
+    
+    # Draw side profile
+    ax3.plot([0, d], [0, h], 'k-', linewidth=2)
+    ax3.plot([0, 0], [0, h], 'g--', label='Support')
+    
+    # Add angle label
+    ax3.text(d/2, h/2, f'{spec.angle_deg}°', ha='center', va='bottom')
+    
+    ax3.set_title('Side Profile')
+    ax3.set_aspect('equal')
+    ax3.set_xlabel('Depth (m)')
+    ax3.set_ylabel('Height (m)')
+    ax3.legend()
 
-    # Uprights
-    ax.plot([0, -panel_depth], [0, spec.height], color="green", linestyle="--", label="Upright/Strut")
-    ax.plot([spec.width, spec.width - panel_depth], [0, spec.height], color="green", linestyle="--")
+    plt.suptitle('DIY Climbing Wall Design', fontsize=16)
+    plt.tight_layout()
+    
+    # Save the figure
 
-    # Labels
-    ax.set_aspect("equal")
-    ax.set_xlim(-panel_depth-0.5, spec.width+0.5)
-    ax.set_ylim(0, spec.height+0.5)
-    ax.set_xlabel("Width (m)")
-    ax.set_ylabel("Height (m)")
-    ax.set_title(f"DIY Climbing Wall Layout ({spec.angle_deg}°)")
-    ax.legend()
-    plt.show()
+    save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "wall_design.png")
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    print(f"\nWall design saved to: {save_path}")
+    
+    # Uncomment to show interactive plot instead of saving
+    # plt.show()
 
 def frange(start, stop, step):
     while start < stop:
