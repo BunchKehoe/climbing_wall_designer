@@ -2,44 +2,69 @@
 
 WALL SPECIFICATIONS
 ------------------
-Overall Height: 1.77 m
-Overall Width: 1.20 m
-Depth from Wall: 1.94 m
-Wall Angle: 47.6°
-Actual Panel Length: 2.62 m
-Total Panel Area: 3.15 m²
+Overall Height: 2.40 m
+Overall Width: 2.40 m
+Depth from Wall: 2.00 m
+Wall Angle: 39.8°
+Actual Panel Length: 3.12 m
+Total Panel Area: 7.50 m²
 
 PLYWOOD PANELS
 -------------
 Type: Structural Plywood (minimum 18mm thick)
-Full Sheets Required: 2
+Full Sheets Required: 4
 Sheet Size: 2500mm x 1250mm
-Coverage Area Required: 3.15 m²
+Coverage Area Required: 7.50 m²
 
 TIMBER FRAME
 -----------
-Base beam: 1.20 m
-Uprights (x2): 5.25 m
-Cross braces (x2): 1.20 m
-Kicker/struts: 1.94 m
+Base beam: 2.40 m
+Uprights (x2): 6.25 m
+Cross braces (x2): 2.40 m
+Kicker/struts: 2.00 m
 
-CLIMBING HOLDS & HARDWARE
------------------------
-T-nuts Required: 48 (20mm countersunk)
-Recommended Holds: 24
-Mounting Bolts: 24 (M10 Allen head)
-T-nut Spacing: 20.0 cm
+HARDWARE RECOMMENDATIONS
+----------------------
+- Pre-drill holes for climbing holds as needed
+- Use 20mm countersunk T-nuts for hold mounting
+- Use M10 Allen head bolts for holds
+- Space holds according to route design
+- Install holds after completing wall construction and sealing
 
 CRITICAL ANGLES
 --------------
-Upright to base: 47.6°
-Top plate join: 42.4°
+Upright to base: 39.8°
+Top plate join: 50.2°
 
 SAFETY INFORMATION
 -----------------
-Maximum Safe Climber Weight: 56.6 kg
-Safety Factor: 2.5
-Recommended Anchor Points: 4 minimum
+⚠️ CRITICAL SAFETY WARNINGS ⚠️
+1. Maximum Safe Climber Weight: 153.6 kg
+2. Overall Safety Factor: 7.5 (3.0 × 2.5 for dynamic loads)
+3. Minimum Required Materials:
+   - 18mm structural grade plywood
+   - Grade 8.8 or higher M10 bolts
+   - Structural grade timber
+4. Required Anchor Points: Minimum 4
+5. Load Testing:
+   - Test with static loads before climbing
+   - Start at 50% max weight and gradually increase
+   - Check all joints and anchors after testing
+6. Regular Inspection:
+   - Check all bolts monthly
+   - Inspect timber for damage/rot
+   - Verify anchor points remain secure
+7. Additional Safety Measures:
+   - Use proper crash pads
+   - Never climb alone
+   - Stay within weight limits
+   - Maintain proper clearance zones
+
+CERTIFIED INSPECTION REQUIRED:
+This design must be reviewed by a qualified person
+before use. Climbing is inherently dangerous and
+improper construction could result in serious
+injury or death.
 
 ADDITIONAL MATERIALS
 -------------------

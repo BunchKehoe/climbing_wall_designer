@@ -15,7 +15,6 @@ class WallSpec:
     height: float  # meters
     width: float   # meters
     depth: float   # meters
-    tnut_spacing: float = 0.20  # meters
     
     @property
     def angle_deg(self) -> float:
@@ -25,18 +24,47 @@ class WallSpec:
 @dataclass
 class MaterialList:
     plywood_sheets: int
-    tnuts: int
-    holds: int
-    bolts: int
     timber_lengths: list
     cut_angles: dict
     safe_climber_weight: float
 
 def calculate_wall(spec: WallSpec) -> MaterialList:
+    # Validate dimensions
+    if spec.height <= 0 or spec.width <= 0 or spec.depth <= 0:
+        raise ValueError("All dimensions must be positive numbers")
+
+    # Validate angle safety constraints
+    angle_deg = spec.angle_deg
+    if angle_deg < 15:
+        raise ValueError(f"Wall angle {angle_deg:.1f}° is too shallow. Minimum angle is 15°")
+    if angle_deg > 70:  # Maximum safe angle for home climbing walls
+        raise ValueError(f"Wall angle {angle_deg:.1f}° is too steep. Maximum safe angle is 70°")
+        
+    # Validate height for home installation safety
+    if spec.height > 4.0:  # 4 meters is maximum safe height for home installation
+        raise ValueError(f"Height {spec.height:.1f}m exceeds safe limit of 4.0m for home installation")
+        
+    # Validate width and height-to-width ratio for stability
+    if spec.width < 1.2:  # Minimum width for stability
+        raise ValueError(f"Width {spec.width:.1f}m is too small for stability. Minimum width is 1.2m")
+    
+    # Check height-to-width ratio (maximum 2:1 for stability)
+    if spec.height / spec.width > 2.0:
+        raise ValueError(f"Height-to-width ratio {spec.height/spec.width:.1f} exceeds safe limit of 2.0")
+
     h = spec.height * 1000
     w = spec.width * 1000
     d = spec.depth * 1000
-    angle = math.radians(spec.angle_deg)
+    angle = math.radians(angle_deg)
+
+    # Calculate required depth based on angle
+    panel_depth = spec.height * math.tan(angle)
+    
+    # Add a small tolerance (1cm) to account for rounding errors
+    if panel_depth > spec.depth + 0.01:
+        required_depth = panel_depth
+        actual_angle = math.degrees(math.atan(spec.depth / spec.height))
+        raise ValueError(f"Not enough depth. Maximum angle for given depth is {actual_angle:.1f}°")
 
     panel_height = h / math.cos(angle)
     panel_depth = h * math.tan(angle)
@@ -49,12 +77,7 @@ def calculate_wall(spec: WallSpec) -> MaterialList:
     rows = math.ceil(panel_height / sheet_h)
     total_sheets = sheets_per_row * rows
 
-    # T-nut grid
-    grid_x = int(w // (spec.tnut_spacing * 1000))
-    grid_y = int(h // (spec.tnut_spacing * 1000))
-    tnuts = grid_x * grid_y
-    holds = tnuts // 2
-    bolts = holds
+    # Hardware calculations removed - holds can be placed as needed
 
     # Frame timber lengths
     base_beam = w
@@ -73,19 +96,32 @@ def calculate_wall(spec: WallSpec) -> MaterialList:
         "Top plate join": 90 - spec.angle_deg
     }
 
-    # Safety calculations
-    panel_capacity = (w / 1000) * (h / 1000) * 200  # kg
-    timber_capacity = 1200
-    bolt_capacity = 6400
+    # Safety calculations with strict validation
+    panel_capacity = (w / 1000) * (h / 1000) * 200  # kg/m² for 18mm structural plywood
+    timber_capacity = 1200  # kg for structural grade timber
+    bolt_capacity = 6400   # kg for M10 bolts
+    
+    # Additional angle-based safety factors
+    if angle > math.radians(45):
+        # Reduce capacities for steep angles due to increased shear forces
+        panel_capacity *= 0.8
+        timber_capacity *= 0.8
+        
     raw_capacity = min(panel_capacity, timber_capacity, bolt_capacity)
+    
+    # Strict safety factors:
+    # - Factor of 3.0 for general safety
+    # - Additional factor of 2.5 for dynamic loads
+    # - Total safety factor of 7.5
     safe_capacity = raw_capacity / 3.0
     safe_climber_weight = safe_capacity / 2.5
+    
+    # Validate minimum safe capacity
+    if safe_climber_weight < 80:  # Minimum safe capacity for adult climbers
+        raise ValueError(f"Design cannot safely support minimum required weight of 80kg")
 
     return MaterialList(
         plywood_sheets=total_sheets,
-        tnuts=tnuts,
-        holds=holds,
-        bolts=bolts,
         timber_lengths=timber_lengths,
         cut_angles=cut_angles,
         safe_climber_weight=safe_climber_weight
@@ -155,9 +191,8 @@ def draw_wall(spec: WallSpec, materials: MaterialList):
     ax1.text(-0.2, spec.height/2, 0, f'{spec.height:.2f}m', ha='right')
     ax1.text(spec.width+0.2, 0, spec.depth/2, f'{spec.depth:.2f}m', ha='left')
     
-    # Top view with T-nut grid (top right)
+    # Top view (top right)
     ax2 = fig.add_subplot(222)
-    spacing = spec.tnut_spacing
     angle = math.radians(spec.angle_deg)
     panel_width = spec.width
     panel_height = spec.height / math.cos(angle)
@@ -165,12 +200,7 @@ def draw_wall(spec: WallSpec, materials: MaterialList):
     # Draw panel outline
     ax2.add_patch(plt.Rectangle((0, 0), panel_width, panel_height, fill=False))
     
-    # Draw T-nut grid
-    for x in np.arange(spacing, panel_width-spacing/2, spacing):
-        for y in np.arange(spacing, panel_height-spacing/2, spacing):
-            ax2.plot(x, y, 'ko', markersize=3)
-    
-    ax2.set_title('T-nut Grid Layout (Top View)')
+    ax2.set_title('Panel Layout (Top View)')
     ax2.set_aspect('equal')
     ax2.set_xlabel('Width (m)')
     ax2.set_ylabel('Length (m)')
@@ -196,17 +226,24 @@ def draw_wall(spec: WallSpec, materials: MaterialList):
     plt.suptitle('DIY Climbing Wall Design', fontsize=16)
     plt.tight_layout()
     
+    # Create designs directory if it doesn't exist
+    designs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "designs")
+    os.makedirs(designs_dir, exist_ok=True)
+    
     # Save the figure
-
-    save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "designs/wall_design.png")
+    save_path = os.path.join(designs_dir, "wall_design.png")
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     print(f"\nWall design saved to: {save_path}")
     
     # Uncomment to show interactive plot instead of saving
     # plt.show()
 
-def create_materials_list(spec: WallSpec, materials: MaterialList):
-    """Create a detailed materials list file with dimensions and quantities"""
+def create_materials_list(spec: WallSpec, materials: MaterialList) -> str:
+    """Create a detailed materials list file with dimensions and quantities
+    
+    Returns:
+        str: The formatted materials list content
+    """
     
     # Calculate additional measurements
     angle = math.radians(spec.angle_deg)
@@ -239,12 +276,13 @@ TIMBER FRAME
     
     content += f"""
 
-CLIMBING HOLDS & HARDWARE
------------------------
-T-nuts Required: {materials.tnuts} (20mm countersunk)
-Recommended Holds: {materials.holds}
-Mounting Bolts: {materials.bolts} (M10 Allen head)
-T-nut Spacing: {spec.tnut_spacing * 100:.1f} cm
+HARDWARE RECOMMENDATIONS
+----------------------
+- Pre-drill holes for climbing holds as needed
+- Use 20mm countersunk T-nuts for hold mounting
+- Use M10 Allen head bolts for holds
+- Space holds according to route design
+- Install holds after completing wall construction and sealing
 
 CRITICAL ANGLES
 --------------"""
@@ -256,9 +294,33 @@ CRITICAL ANGLES
 
 SAFETY INFORMATION
 -----------------
-Maximum Safe Climber Weight: {materials.safe_climber_weight:.1f} kg
-Safety Factor: 2.5
-Recommended Anchor Points: 4 minimum
+⚠️ CRITICAL SAFETY WARNINGS ⚠️
+1. Maximum Safe Climber Weight: {materials.safe_climber_weight:.1f} kg
+2. Overall Safety Factor: 7.5 (3.0 × 2.5 for dynamic loads)
+3. Minimum Required Materials:
+   - 18mm structural grade plywood
+   - Grade 8.8 or higher M10 bolts
+   - Structural grade timber
+4. Required Anchor Points: Minimum 4
+5. Load Testing:
+   - Test with static loads before climbing
+   - Start at 50% max weight and gradually increase
+   - Check all joints and anchors after testing
+6. Regular Inspection:
+   - Check all bolts monthly
+   - Inspect timber for damage/rot
+   - Verify anchor points remain secure
+7. Additional Safety Measures:
+   - Use proper crash pads
+   - Never climb alone
+   - Stay within weight limits
+   - Maintain proper clearance zones
+
+CERTIFIED INSPECTION REQUIRED:
+This design must be reviewed by a qualified person
+before use. Climbing is inherently dangerous and
+improper construction could result in serious
+injury or death.
 
 ADDITIONAL MATERIALS
 -------------------
@@ -277,11 +339,11 @@ INSTALLATION NOTES
 6. Apply sealant before installing holds
 7. Double-check all bolt tightness before use"""
 
-    # Create materials list file
-    materials_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "materials_lists/materials_list.txt")
-    with open(materials_path, 'w') as f:
-        f.write(content)
-    print(f"\nMaterials list saved to: {materials_path}")
+    # Create materials list directory if it doesn't exist
+    materials_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "materials_lists")
+    os.makedirs(materials_dir, exist_ok=True)
+    
+    return content
 
 def frange(start, stop, step):
     while start < stop:
@@ -289,23 +351,41 @@ def frange(start, stop, step):
         start += step
 
 if __name__ == "__main__":
-    wall = WallSpec(height=HEIGHT, width=WIDTH, depth=DEPTH)  # depth adjusted for typical home climbing wall
+    wall = WallSpec(height=2.4, width=2.4, depth=2.0)  # depth adjusted to accommodate calculated angle
     materials = calculate_wall(wall)
 
-    print("=== DIY Spray Wall Plan ===")
-    print(f"Plywood sheets needed: {materials.plywood_sheets}")
-    print(f"T-nuts required: {materials.tnuts}")
-    print(f"Holds recommended: {materials.holds}")
-    print(f"Bolts required: {materials.bolts}")
-    print("\nTimber cut list (meters):")
+    print("=== DIY Climbing Wall Plan ===")
+    print(f"\nWALL SPECIFICATIONS:")
+    print(f"Height: {wall.height:.2f} m")
+    print(f"Width: {wall.width:.2f} m")
+    print(f"Depth from wall: {wall.depth:.2f} m")
+    print(f"Wall angle: {wall.angle_deg}°")
+
+    print("\nMATERIALS REQUIRED:")
+    print(f"Plywood sheets needed (2500x1250mm): {materials.plywood_sheets}")
+    
+    print("\nTIMBER CUT LIST (meters):")
     for name, length in materials.timber_lengths:
         print(f"  {name}: {length:.2f} m")
-    print("\nCut Angles (degrees):")
+    
+    print("\nCUT ANGLES (degrees):")
     for joint, angle in materials.cut_angles.items():
         print(f"  {joint}: {angle:.1f}°")
-    print("\n=== Safety Check ===")
+    
+    print("\nSAFETY INFORMATION:")
     print(f"Safe maximum climber weight: {materials.safe_climber_weight:.1f} kg")
+    print("Remember to test thoroughly before full-weight climbing")
 
     # Generate the design and materials list
     draw_wall(wall, materials)
-    create_materials_list(wall, materials)
+    content = create_materials_list(wall, materials)
+    
+    # Create materials list directory if it doesn't exist
+    materials_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "materials_lists")
+    os.makedirs(materials_dir, exist_ok=True)
+    
+    # Save the materials list
+    materials_path = os.path.join(materials_dir, "materials_list.txt")
+    with open(materials_path, 'w') as f:
+        f.write(content)
+    print(f"\nDetailed materials list saved to: {materials_path}")

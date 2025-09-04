@@ -14,6 +14,9 @@ A Python application for designing home climbing walls based on available space 
 
 - Python 3.7+
 - Matplotlib
+- NumPy
+- pytest (for testing)
+- pytest-cov (for test coverage)
 
 ## Installation
 
@@ -27,6 +30,48 @@ A Python application for designing home climbing walls based on available space 
    ```bash
    pip install -r requirements.txt
    ```
+
+## Testing
+
+The project includes a comprehensive test suite covering core functionality, edge cases, and visualization components.
+
+### Running Tests
+
+Run all tests using:
+```bash
+python -m unittest tests/test_wall_designer.py
+```
+
+Or for more detailed output:
+```bash
+pytest tests/test_wall_designer.py -v
+```
+
+### Test Coverage
+
+To generate a test coverage report:
+```bash
+pytest --cov=wall_designer tests/
+```
+
+### What's Tested
+
+The test suite includes verification of:
+- Core calculations and geometry
+- Material requirements calculation
+- Safety factor calculations
+- Visualization generation
+- Edge cases and boundary conditions
+- Input validation
+- File output generation
+
+### Adding New Tests
+
+When contributing new features, please add corresponding tests in `tests/test_wall_designer.py`. Tests should cover:
+- Normal usage cases
+- Edge cases and boundary conditions
+- Error conditions
+- Any new calculations or visualizations
 
 ## Usage
 
