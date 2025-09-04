@@ -2,42 +2,42 @@
 
 WALL SPECIFICATIONS
 ------------------
-Overall Height: 2.40 m
-Overall Width: 2.40 m
-Depth from Wall: 3.00 m
-Wall Angle: 25°
-Actual Panel Length: 2.65 m
-Total Panel Area: 6.36 m²
+Overall Height: 1.77 m
+Overall Width: 1.20 m
+Depth from Wall: 1.94 m
+Wall Angle: 47.6°
+Actual Panel Length: 2.62 m
+Total Panel Area: 3.15 m²
 
 PLYWOOD PANELS
 -------------
 Type: Structural Plywood (minimum 18mm thick)
-Full Sheets Required: 4
+Full Sheets Required: 2
 Sheet Size: 2500mm x 1250mm
-Coverage Area Required: 6.36 m²
+Coverage Area Required: 3.15 m²
 
 TIMBER FRAME
 -----------
-Base beam: 2.40 m
-Uprights (x2): 5.30 m
-Cross braces (x2): 2.40 m
-Kicker/struts: 1.12 m
+Base beam: 1.20 m
+Uprights (x2): 5.25 m
+Cross braces (x2): 1.20 m
+Kicker/struts: 1.94 m
 
 CLIMBING HOLDS & HARDWARE
 -----------------------
-T-nuts Required: 144 (20mm countersunk)
-Recommended Holds: 72
-Mounting Bolts: 72 (M10 Allen head)
+T-nuts Required: 48 (20mm countersunk)
+Recommended Holds: 24
+Mounting Bolts: 24 (M10 Allen head)
 T-nut Spacing: 20.0 cm
 
 CRITICAL ANGLES
 --------------
-Upright to base: 25.0°
-Top plate join: 65.0°
+Upright to base: 47.6°
+Top plate join: 42.4°
 
 SAFETY INFORMATION
 -----------------
-Maximum Safe Climber Weight: 153.6 kg
+Maximum Safe Climber Weight: 56.6 kg
 Safety Factor: 2.5
 Recommended Anchor Points: 4 minimum
 

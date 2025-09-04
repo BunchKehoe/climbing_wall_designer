@@ -6,13 +6,21 @@ import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import os
 
+HEIGHT = 1.77  # meters
+WIDTH = 1.2   # meters
+DEPTH = 1.94   # meters
+
 @dataclass
 class WallSpec:
     height: float  # meters
     width: float   # meters
     depth: float   # meters
-    angle_deg: float = 25.0
     tnut_spacing: float = 0.20  # meters
+    
+    @property
+    def angle_deg(self) -> float:
+        """Calculate the wall angle in degrees based on height and depth"""
+        return round(math.degrees(math.atan(self.depth / self.height)), 1)
 
 @dataclass
 class MaterialList:
@@ -281,7 +289,7 @@ def frange(start, stop, step):
         start += step
 
 if __name__ == "__main__":
-    wall = WallSpec(height=2.4, width=2.4, depth=3.0, angle_deg=25)
+    wall = WallSpec(height=HEIGHT, width=WIDTH, depth=DEPTH)  # depth adjusted for typical home climbing wall
     materials = calculate_wall(wall)
 
     print("=== DIY Spray Wall Plan ===")
